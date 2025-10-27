@@ -4,7 +4,7 @@ drop database banco_livros; /*exclui fisicamente o banco de dados */
 drop table tb_livro;
 
 create table tb_livro(
-		pk_id_livro int primary key auto_increment not null,
+		id_livro int auto_increment not null,
         nome_livro varchar(100),
         numero_paginas int,
         genero_livro enum('suspense','terror','ficção cientefica', 'comédia','ação','romance','infantil','juvenil','LGBT+'),
@@ -16,8 +16,15 @@ create table tb_livro(
         avaliacao_livro enum("maravilhoso","ótimo", "bom", "regular", "ruim", "péssimo","não sei"),
         status_livro enum ('lido','lendo', 'não lido', 'desisti', 'na lista'),
         edicao varchar(30),
-        estado_conservacao enum("novo","usado","semi-novo")
+        estado_conservacao enum("novo","usado","semi-novo"),
+        id_autor int,
+        id_editora int,
+        constraint pk_id_livro primary key (id_livro)
 );
+
+alter table tb_livro 
+add constraint fk_id_editora foreign key (id_editora) references tb_editora(id_editora),
+add constraint fk_id_autor foreign key (id_autor) references tb_autor(id_autor);
 
 describe tb_livro; /*exibe a estrutura da tabela*/
 select * from tb_livro; /* exibe o conteúdo da tabela */
@@ -39,15 +46,29 @@ insert into tb_livro
 
 
 create table tb_editora(
-		pk_id_editora int primary key auto_increment not null,
+		id_editora int auto_increment not null,
         nome_editora varchar(100) not null,
         quantidade_autores int not null,
         quantidade_obras_editora int not null,
         data_fundacao date not null,
         pais_de_origem varchar(30) not null,
-        endereco varchar(150) not null
+        endereco varchar(150) not null,
+        id_livro int,
+        id_autor int,
+        constraint pk_id_editora primary key (id_editora)
 );
+SHOW CREATE TABLE tb_editora;
 
+
+alter table tb_editora
+
+add constraint fk_idautor foreign key (id_autor) references tb_autor(id_autor),
+add constraint fk_id_livro foreign key (id_livro) references tb_livro(id_livro);
+
+/*LEMBRANDO: os nomes das FKs não podem ser iguais em cada tabela, precisa mudar!! */
+
+
+drop table tb_editora;
 describe tb_editora;
 select * from tb_editora;
 
@@ -77,3 +98,80 @@ commit; /*salva oficial, não tem rollback que volte a ação = confirma a execu
 
 update tb_livro set nome_livro = "Verity: Uma trágica história de amor" where pk_id_livro = 4;
 update tb_livro set numero_paginas = 290 where pk_id_livro = 3;
+
+alter table tb_editora add column cnpj char(18) not null; /*criando uma coluna dentro de uma tabela*/
+describe tb_editora;
+select * from tb_editora;
+
+update tb_editora set cnpj = "56.887.499/0001-65" where pk_id_editora = 1; /*inserindo valor dentro dessa coluna criada*/
+
+alter table tb_editora drop column cnpj; /*deletando uma coluna dentro de uma tabela*/
+
+alter table tb_editora modify column cnpj char(20); /*modifica o tipo a estrutura do campo na tabela*/
+
+
+create table tb_autor(
+		id_autor int primary key auto_increment not null,
+        nome_autor varchar(100) not null,
+        data_nasc date not null,
+        quantidade_obras_autor int not null,
+        nacionalidade varchar(30) not null,
+		genero_autor enum("feminino", "masculino", "não-binário")
+);
+
+drop table tb_autor;
+
+CREATE TABLE `banco_livros`.`tb_autor` (
+  `id_autor` INT NOT NULL AUTO_INCREMENT,
+  `nome_autor` VARCHAR(100) NOT NULL,
+  `data_nasc_autor` DATE NOT NULL,
+  `quant_obras_autor` INT NOT NULL,
+  `nacionalidade` VARCHAR(45) NOT NULL,
+  `genero_autor` ENUM("F", "M", "NB", "outro") NOT NULL,
+  
+	id_livro int,
+	id_editora int,
+	constraint pk_id_autor primary key (id_autor)
+  );
+
+alter table tb_autor
+add constraint fk_id_editora foreign key (id_editora) references tb_editora(id_editora),
+add constraint fk_id_livro foreign key (id_livro) references tb_livro(id_livro);
+  
+  
+select * from tb_autor;
+  
+insert into tb_autor (nome_autor,data_nasc_autor,quant_obras_autor, nacionalidade, genero_autor)values
+('Rafael Montes', '1990-09-22', 7, 'Brasileira', 'M'),
+('Clarice Lispector', '1920-12-10', 25, 'Brasileira', 'F'),
+('Machado de Assis', '1839-06-21', 50, 'Brasileira', 'M'),
+('J.K. Rowling', '1965-07-31', 15, 'Britânica', 'F'),
+('George Orwell', '1903-06-25', 10, 'Britânica', 'M'),
+('Agatha Christie', '1890-09-15', 85, 'Britânica', 'F'),
+('Chimamanda Ngozi Adichie', '1977-09-15', 12, 'Nigeriana', 'F'),
+('Haruki Murakami', '1949-01-12', 25, 'Japonesa', 'M'),
+('Stephen King', '1947-09-21', 65, 'Americana', 'M'),
+('Conceição Evaristo', '1946-11-29', 10, 'Brasileira', 'F'),
+('Neil Gaiman', '1960-11-10', 40, 'Britânica', 'M');
+
+alter table tb_autor add column cpf char(11) not null;
+
+update tb_autor set nome_autor = "Clarice Mudança" where pk_id_autor = 2;
+
+alter table tb_autor 
+change column nacionalidade nacionalidade_autor varchar(45) not null;
+
+alter table tb_autor drop column quant_obras_autor;
+
+update tb_autor set nome_autor = "Jujutsu Kaizen" where pk_id_autor = 11;
+
+alter table tb_autor add column premiacoes int not null;
+
+start transaction;
+
+delete from tb_autor;
+select * from tb_autor;
+
+rollback;
+
+drop table tb_livro;
