@@ -65,7 +65,7 @@ alter table tb_editora
 add constraint fk_idautor foreign key (id_autor) references tb_autor(id_autor),
 add constraint fk_id_livro foreign key (id_livro) references tb_livro(id_livro);
 
-/*LEMBRANDO: os nomes das FKs não podem ser iguais em cada tabela, precisa mudar!! */
+/*LEMBRANDO: os nomes das FKs não podem ser iguais em cada tabela, precisa mudar!! 
 
 
 drop table tb_editora;
